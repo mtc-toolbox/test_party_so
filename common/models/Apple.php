@@ -16,6 +16,18 @@ use Yii;
  */
 class Apple extends \yii\db\ActiveRecord
 {
+    // наименование цветов яблок
+    const COLOR_NAME_GREEN  = 'green';
+    const COLOR_NAME_RED    = 'red';
+    const COLOR_NAME_YELLOW = 'yellow';
+
+    // коды цветов для БД
+    const COLOR_MAP = [
+        self::COLOR_NAME_GREEN  => 0,
+        self::COLOR_NAME_RED    => 1,
+        self::COLOR_NAME_YELLOW => 2,
+    ];
+
     /**
      * {@inheritdoc}
      */
