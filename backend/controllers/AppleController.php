@@ -1,6 +1,6 @@
 <?php
 
-namespace app\controllers;
+namespace backend\controllers;
 
 use Yii;
 use common\models\Apple;
@@ -48,9 +48,8 @@ class AppleController extends Controller
     public function actionIndex()
     {
         $searchModel  = new AppleSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
+        $dataProvider = $searchModel->search();
+        return $this->render('@app/views/apple/index', [
             'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider,
         ]);

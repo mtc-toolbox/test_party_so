@@ -1,7 +1,6 @@
 <?php
 
 /* @var $this \yii\web\View */
-
 /* @var $content string */
 
 use backend\assets\AppAsset;
@@ -31,24 +30,22 @@ AppAsset::register($this);
     <?php
     NavBar::begin([
         'brandLabel' => Yii::$app->name,
-        'brandUrl'   => Yii::$app->homeUrl,
-        'options'    => [
+        'brandUrl' => Yii::$app->homeUrl,
+        'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
-
     $menuItems = [];
-
     if (Yii::$app->user->isGuest) {
-        $menuItems[] = ['label' => 'Войти', 'url' => ['/site/login']];
+        $menuItems[] = ['label' => 'Вход', 'url' => ['/site/login']];
     } else {
-        $menuItems[] = [
+        $menuItems = [
             ['label' => 'Яблоки', 'url' => ['/apple/index']],
         ];
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')
             . Html::submitButton(
-                'Выйти',
+                'Выход',
                 ['class' => 'btn btn-link logout']
             )
             . Html::endForm()
@@ -56,7 +53,7 @@ AppAsset::register($this);
     }
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav navbar-right'],
-        'items'   => $menuItems,
+        'items' => $menuItems,
     ]);
     NavBar::end();
     ?>
