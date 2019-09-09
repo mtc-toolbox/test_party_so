@@ -164,4 +164,14 @@ class Apple extends \yii\db\ActiveRecord
     {
         return self::REVERSE_COLOR_MAP[$this->Color];
     }
+
+    /**
+     * {@inheritdoc}
+     * @return AppleQuery the active query used by this AR class.
+     */
+    public static function find()
+    {
+        return (new AppleQuery(get_called_class()))->active();
+    }
+
 }
