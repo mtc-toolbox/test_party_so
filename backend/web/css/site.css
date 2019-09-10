@@ -119,3 +119,118 @@ a.desc:after {
 .nav > li > form > button.logout:focus {
     outline: none;
 }
+
+
+.apple-container {
+	width: 134px;
+	height: 134px;
+	position:relative;
+	overflow:hidden;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #EEEEEE;
+}
+
+.apple-cell {
+	margin: 10px;
+	float:left;
+}
+
+.apple-image {
+	width: 128px;
+	height: 128px;
+	position:absolute;
+	left: 7px;
+	top: 2px;
+	font-size:128px;
+	z-index:1;
+	display:block;
+}
+
+.apple-download {
+	width: 14px;
+	height: 14px;
+	position:absolute;
+	left: 7px;
+	top: 2px;
+	font-size:14px;
+	z-index:3;
+	display:block;
+
+}
+
+.apple-eat {
+	width: 14px;
+	height: 14px;
+	position:absolute;
+	left: 24px;
+	top: 2px;
+	font-size:14px;
+	z-index:3;
+	display:block;
+
+}
+
+
+.enabled-tool-button {
+	color:#000;
+	cursor: pointer;
+}
+
+.disabled-tool-button {
+	color:#DDD;
+	cursor: default;
+}
+
+.apple-eated {
+	width: 128px;
+	height: 128px;
+	position:absolute;
+	left: 0px;
+	top: 0px;
+	z-index:2;
+	display:block;
+	color:#FFF;
+	font-size:14px;
+	font-family:Verdana, Geneva, sans-serif;
+	text-align:center;
+	padding-top:60px;
+}
+
+.apple-state {
+	width: 128px;
+	height: 128px;
+	position:absolute;
+	left: 0px;
+	top: 0px;
+	z-index:2;
+	display:block;
+	color:#FFF;
+	font-size:14px;
+	font-family:Verdana, Geneva, sans-serif;
+	text-align:center;
+	padding-top:75px;
+}
+
+.red {
+	color: #F00;
+}
+
+.green {
+	color:#0F0;
+}
+
+.yellow {
+	color:#FD0;
+}
+
+.black {
+	color:#000;
+}
+
+.shadow {
+    background: #FFF;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    padding-right: 5px;
+	padding-bottom: 5px;
+   }

@@ -10,16 +10,22 @@ use yii\behaviors\TimestampBehavior;
 /**
  * This is the model class for table "Apple".
  *
- * @property int    $Id               Идентификатор записи
- * @property int    $Color            Цвет яблока
- * @property string $IntegrityPercent Процент целостности
- * @property string $CreatedAt        Время появления
- * @property string $FalledAt         Время падения
- * @property string $DeletedAt        Время полного поедания
+ * @property int   $Id               Идентификатор записи
+ * @property int   $Color            Цвет яблока
+ * @property float $IntegrityPercent Процент целостности
+ * @property int   $CreatedAt        Время появления
+ * @property int   $FalledAt         Время падения
+ * @property int   $DeletedAt        Время полного поедания
  */
 class Apple extends \yii\db\ActiveRecord
 {
     const TIME_TO_BAD_STATE = 3600 * 5;
+
+    const STATE_NAME_BAD     = 'Испортилось';
+    const STATE_NAME_EAT     = 'Можно есть';
+    const STATE_NAME_TREE    = 'На дереве';
+    const STATE_NAME_DELETED = 'Удалено';
+    const STATE_NAME_UNKNOWN = 'Неизвестно';
 
     // наименование цветов яблок
     const COLOR_NAME_GREEN  = 'green';
@@ -65,7 +71,7 @@ class Apple extends \yii\db\ActiveRecord
                 throw new Exception(Yii::t('app', 'Apple color is bad'), 500);
             }
         } else {
-            $this->Color = self::REVERSE_COLOR_MAP[rand(0, count(self::COLOR_MAP))];
+            $this->Color = self::REVERSE_COLOR_MAP[rand(0, count(self::COLOR_MAP) - 1)];
         }
     }
 
@@ -133,6 +139,10 @@ class Apple extends \yii\db\ActiveRecord
 
         $this->IntegrityPercent = round($this->IntegrityPercent - $this->IntegrityPercent * $percent / 100, 2);
 
+        if (!$this->IntegrityPercent) {
+            $this->DeletedAt = false;
+        }
+
         return $this;
     }
 
@@ -141,7 +151,7 @@ class Apple extends \yii\db\ActiveRecord
      */
     public function isBad()
     {
-        return (isset($this->FalledAt) && (($this->FalledAt + self::TIME_TO_BAD_STATE)>=time()));
+        return (isset($this->FalledAt) && (($this->FalledAt + self::TIME_TO_BAD_STATE) >= time()));
     }
 
     /**
@@ -165,6 +175,54 @@ class Apple extends \yii\db\ActiveRecord
     public function getColorName()
     {
         return self::REVERSE_COLOR_MAP[$this->Color];
+    }
+
+    /**
+     * @return bool
+     */
+    public function canEat()
+    {
+        return !$this->canFall() && !$this->isBad() && !$this->isDeleted();
+    }
+
+    /**
+     * @return bool
+     */
+    public function canFall()
+    {
+        return !isset($this->FalledAt);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDeleted()
+    {
+        return isset($this->DeletedAt);
+    }
+
+    /**
+     * @return string
+     */
+    public function getStateName()
+    {
+        if ($this->isBad()) {
+            return static::STATE_NAME_BAD;
+        }
+
+        if ($this->canFall()) {
+            return static::STATE_NAME_TREE;
+        }
+
+        if ($this->canEat()) {
+            return static::STATE_NAME_EAT;
+        }
+
+        if ($this->isDeleted()) {
+            return static::STATE_NAME_DELETED;
+        }
+
+        return static::STATE_NAME_UNKNOWN;
     }
 
     /**

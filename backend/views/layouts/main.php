@@ -11,8 +11,8 @@ use yii\widgets\Breadcrumbs;
 use common\widgets\Alert;
 
 AppAsset::register($this);
+$this->beginPage()
 ?>
-<?php $this->beginPage() ?>
 <!DOCTYPE html>
 <html lang="<?= Yii::$app->language ?>">
 <head>
@@ -21,10 +21,14 @@ AppAsset::register($this);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php $this->registerCsrfMetaTags() ?>
     <title><?= Html::encode($this->title) ?></title>
-    <?php $this->head() ?>
+    <?php
+        $this->head()
+    ?>
 </head>
 <body>
-<?php $this->beginBody() ?>
+<?php
+    $this->beginBody();
+?>
 
 <div class="wrap">
     <?php
@@ -35,17 +39,16 @@ AppAsset::register($this);
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
-    $menuItems = [];
+    $menuItems = [
+        ['label' => 'Home', 'url' => ['/site/index']],
+    ];
     if (Yii::$app->user->isGuest) {
-        $menuItems[] = ['label' => 'Вход', 'url' => ['/site/login']];
+        $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
     } else {
-        $menuItems = [
-            ['label' => 'Яблоки', 'url' => ['/apple/index']],
-        ];
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')
             . Html::submitButton(
-                'Выход',
+                'Logout',
                 ['class' => 'btn btn-link logout']
             )
             . Html::endForm()
