@@ -65,7 +65,7 @@ class Apple extends \yii\db\ActiveRecord
                 throw new Exception(Yii::t('app', 'Apple color is bad'), 500);
             }
         } else {
-            $this->Color = self::REVERSE_COLOR_MAP[random(0, count(self::COLOR_MAP))];
+            $this->Color = self::REVERSE_COLOR_MAP[rand(0, count(self::COLOR_MAP))];
         }
     }
 
