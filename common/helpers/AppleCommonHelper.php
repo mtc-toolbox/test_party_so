@@ -23,7 +23,7 @@ class AppleCommonHelper
         $count = rand($minCount, $maxCount);
 
         try {
-            $transaction = static::getDb()->beginTransaction();
+            $transaction = Apple::getDb()->beginTransaction();
 
             for ($i = 0; $i <= $count; $i++) {
                 $model = new Apple();
