@@ -10,12 +10,12 @@ use yii\behaviors\TimestampBehavior;
 /**
  * This is the model class for table "Apple".
  *
- * @property int    $Id               Идентификатор записи
- * @property int    $Color            Цвет яблока
- * @property string $IntegrityPercent Процент целостности
- * @property string $CreatedAt        Время появления
- * @property string $FalledAt         Время падения
- * @property string $DeletedAt        Время полного поедания
+ * @property int   $Id               Идентификатор записи
+ * @property int   $Color            Цвет яблока
+ * @property float $IntegrityPercent Процент целостности
+ * @property int   $CreatedAt        Время появления
+ * @property int   $FalledAt         Время падения
+ * @property int   $DeletedAt        Время полного поедания
  */
 class Apple extends \yii\db\ActiveRecord
 {
@@ -141,7 +141,7 @@ class Apple extends \yii\db\ActiveRecord
      */
     public function isBad()
     {
-        return (isset($this->FalledAt) && (($this->FalledAt + self::TIME_TO_BAD_STATE)>=time()));
+        return (isset($this->FalledAt) && (($this->FalledAt + self::TIME_TO_BAD_STATE) >= time()));
     }
 
     /**
