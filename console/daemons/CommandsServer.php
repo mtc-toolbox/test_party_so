@@ -18,17 +18,15 @@ use console\helpers\WSCommonHelper;
  */
 class CommandsServer extends WebSocketServer
 {
-    /**
-     * @var \SplObjectStorage
-     */
     protected $sessions;
-
     /**
      * CommandsServer constructor.
      */
     public function __construct()
     {
         $this->sessions = new \SplObjectStorage();
+
+        $this->closeConnectionOnError = false;
 
         Console::stdout('WS server started' . PHP_EOL);
     }
@@ -66,7 +64,7 @@ class CommandsServer extends WebSocketServer
      */
     protected function getCommandName(string $message)
     {
-        $request = Json::decode($message);
+        $request = Json::decode($message, true);
 
         return $request['action'] ?? null;
     }
@@ -79,34 +77,54 @@ class CommandsServer extends WebSocketServer
      */
     protected function commandGenerate(ConnectionInterface $client, $msg)
     {
+        Console::stdout("Connection run command generate" . PHP_EOL);
         $session = $this->findSession($client);
 
         if (!isset($session)) {
+            Console::stdout("Session not found. Create new." . PHP_EOL);
             $session->sendState(WSCommonHelper::STATUS_DENIED, WSCommonHelper::STATUS_TEXT_DENIED);
             $session->close();
             $this->deleteSession($session);
 
             return;
         }
+
+        Console::stdout("Getting token" . PHP_EOL);
+
+        $session->setData($msg);
+
+        Console::stdout("Check user" . PHP_EOL);
 
         if ($session->isGuest()) {
+            Console::stdout("Session is for guest" . PHP_EOL);
             $session->sendState(WSCommonHelper::STATUS_DENIED, WSCommonHelper::STATUS_TEXT_DENIED);
             $session->close();
             $this->deleteSession($session);
 
             return;
         }
+        Console::stdout("Create apples" . PHP_EOL);
 
         if (!AppleCommonHelper::generateApples()) {
+            Console::stdout("Session could not generate apples" . PHP_EOL);
             $session->sendState(WSCommonHelper::STATUS_UNKNOWN, WSCommonHelper::STATUS_TEXT_UNKNOWN);
 
             return;
         }
 
+        $count = count($this->sessions);
+
+        Console::stdout("Sending $count refreshes" . PHP_EOL);
+
         /* @var SocketSession $session */
         foreach ($this->sessions as $session) {
+            Console::stdout("Sending refresh to " . $session->getToken());
             $session->sendRefresh(WSCommonHelper::STATUS_TEXT_REFRESH);
+            Console::stdout("Ok." . PHP_EOL);
         }
+        $client->send('good');
+
+        Console::stdout("Connection done command generate" . PHP_EOL);
 
     }
 

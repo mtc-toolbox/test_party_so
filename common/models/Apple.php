@@ -17,7 +17,7 @@ use yii\behaviors\TimestampBehavior;
  * @property int   $FalledAt         Время падения
  * @property int   $DeletedAt        Время полного поедания
  */
-class Apple extends \yii\db\ActiveRecord
+class Apple extends ActiveRecord
 {
     const TIME_TO_BAD_STATE = 3600 * 5;
 
@@ -71,8 +71,10 @@ class Apple extends \yii\db\ActiveRecord
                 throw new Exception(Yii::t('app', 'Apple color is bad'), 500);
             }
         } else {
-            $this->Color = self::REVERSE_COLOR_MAP[rand(0, count(self::COLOR_MAP) - 1)];
+            $this->Color = rand(0, count(self::COLOR_MAP) - 1);
         }
+
+        $this->IntegrityPercent = 100;
     }
 
     /**

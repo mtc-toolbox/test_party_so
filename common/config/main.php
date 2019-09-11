@@ -9,6 +9,7 @@ return [
     'components' => [
         'cache' => [
             'class' => 'yii\caching\MemCache',
+            'defaultDuration' => 600,
             'servers' => [
                 [
                     'host' => 'localhost',

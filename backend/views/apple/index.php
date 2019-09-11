@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Apple;
+use console\models\SocketSession;
 use yii\helpers\Url;
 use yii\bootstrap\Html;
 use yii\widgets\ListView;
@@ -33,6 +34,16 @@ echo Html::beginTag('div', ['class' => 'apple-list']);
 
 echo Html::endTag('div');
 
+echo Html::beginTag('div', ['class' => 'form-group']);
+    echo Html::submitButton('Случайная генерация', ['class' => 'btn btn-primary', 'id' => 'generate-apples']);
+echo Html::endTag('div');
+
 echo $this->render('create', [
     'model'   => new Apple(),
 ]);
+$token = Yii::$app->getRequest()->getCsrfToken(false);
+$key = Yii::$app->cache->buildKey($token);
+
+echo Html::script("var accessToken ='{$key}';");
+
+$this->registerJsFile('/js/ws.js',['depends' => [\yii\web\JqueryAsset::class]]);

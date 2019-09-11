@@ -27,7 +27,8 @@ class AppleCommonHelper
 
             for ($i = 0; $i <= $count; $i++) {
                 $model = new Apple();
-                if (!$model->save()) {
+
+                if (!$model->insert(false)) {
                     $transaction->rollBack();
 
                     return false;

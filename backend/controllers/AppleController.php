@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use console\models\SocketSession;
 use Yii;
 use common\models\Apple;
 use common\models\AppleSearch;
@@ -26,16 +27,10 @@ class AppleController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['index', 'generate'],
+                        'actions' => ['index'],
                         'allow'   => true,
                         'roles'   => ['@'],
                     ],
-                ],
-            ],
-            'verbs'  => [
-                'class'   => VerbFilter::className(),
-                'actions' => [
-                    'generate' => ['POST'],
                 ],
             ],
         ];
@@ -49,6 +44,16 @@ class AppleController extends Controller
     {
         $searchModel  = new AppleSearch();
         $dataProvider = $searchModel->search();
+
+        $token = Yii::$app->request->getCsrfToken(false);
+
+        $key = Yii::$app->cache->buildKey($token);
+
+        if (Yii::$app->cache->exists($key)) {
+            Yii::$app->cache->delete($key);
+        }
+        Yii::$app->cache->add($key, Yii::$app->user->id);
+
         return $this->render('@app/views/apple/index', [
             'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider,

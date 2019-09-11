@@ -38,7 +38,7 @@ class WSCommonHelper
      */
     public static function buildStateMessage(int $state = WSCommonHelper::STATUS_OK, string $msg = '')
     {
-        return static::buildMessage(static::STATUS_OK, $msg, static::ACTION_STATE);
+        return static::buildMessage($state, $msg, static::ACTION_STATE);
     }
 
     /**
@@ -60,7 +60,6 @@ class WSCommonHelper
             'data'   => $data ?? [],
         ];
 
-
-        return $data;
+        return Json::encode($result);
     }
 }
