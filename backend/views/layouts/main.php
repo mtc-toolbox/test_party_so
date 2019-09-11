@@ -24,6 +24,8 @@ $this->beginPage()
     <?php
         $this->head()
     ?>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <?php

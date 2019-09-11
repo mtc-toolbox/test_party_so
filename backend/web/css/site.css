@@ -140,8 +140,8 @@ a.desc:after {
 	width: 128px;
 	height: 128px;
 	position:absolute;
-	left: 7px;
-	top: 2px;
+	left: 10px;
+	top: -20px;
 	font-size:128px;
 	z-index:1;
 	display:block;

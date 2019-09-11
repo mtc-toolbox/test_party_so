@@ -18,7 +18,7 @@ $eatState =  $model->canEat() ? 'enabled-tool-button' : 'disabled-tool-button';
   		<div class="fa fa-download <?=$downloadState?>"></div>
 	  </div>
       <div class="apple-eat">
-  		<div class="fab fa-apple <?=$downloadState?>"></div>
+  		<div class="fab fa-apple <?=$eatState?>"></div>
 	  </div>
 	  <div class="apple-image <?=$model->getColorName() ?>">
   		<div class="fa fa-apple-alt"></div>
