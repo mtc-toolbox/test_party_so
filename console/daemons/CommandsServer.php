@@ -1,10 +1,9 @@
 <?php
 
 
-namespace app\daemons;
+namespace console\daemons;
 
 use common\helpers\AppleCommonHelper;
-use common\models\Apple;
 use console\models\SocketSession;
 use consik\yii2websocket\WebSocketServer;
 use Ratchet\ConnectionInterface;
@@ -83,7 +82,7 @@ class CommandsServer extends WebSocketServer
         $session = $this->findSession($client);
 
         if (!isset($session)) {
-            $session->sendState(WSCommonHelper::STATUS_DENIED, 'Session not found');
+            $session->sendState(WSCommonHelper::STATUS_DENIED, WSCommonHelper::STATUS_TEXT_DENIED);
             $session->close();
             $this->deleteSession($session);
 
@@ -91,7 +90,7 @@ class CommandsServer extends WebSocketServer
         }
 
         if ($session->isGuest()) {
-            $session->sendState(WSCommonHelper::STATUS_DENIED, 'Access denied');
+            $session->sendState(WSCommonHelper::STATUS_DENIED, WSCommonHelper::STATUS_TEXT_DENIED);
             $session->close();
             $this->deleteSession($session);
 
@@ -99,14 +98,14 @@ class CommandsServer extends WebSocketServer
         }
 
         if (!AppleCommonHelper::generateApples()) {
-            $session->sendState(WSCommonHelper::STATUS_UNKNOWN, 'Apples generate error');
+            $session->sendState(WSCommonHelper::STATUS_UNKNOWN, WSCommonHelper::STATUS_TEXT_UNKNOWN);
 
             return;
         }
 
         /* @var SocketSession $session */
         foreach ($this->sessions as $session) {
-            $session->sendRefresh('Need to refresh browser');
+            $session->sendRefresh(WSCommonHelper::STATUS_TEXT_REFRESH);
         }
 
     }

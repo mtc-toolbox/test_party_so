@@ -1,12 +1,16 @@
 <?php
 
 
-namespace app\commands;
+namespace console\controllers;
 
-use consik\yii2websocket\WebSocketServer;
+use console\daemons\CommandsServer;
 use yii\console\Controller;
 
 class ServerController  extends Controller
 {
-
+    public function actionStart()
+    {
+        $server = new CommandsServer();
+        $server->start();
+    }
 }

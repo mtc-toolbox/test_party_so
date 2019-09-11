@@ -20,6 +20,11 @@ class WSCommonHelper
     const STATUS_DENIED  = 403;
     const STATUS_UNKNOWN = 500;
 
+    const STATUS_TEXT_OK      = 'Ok';
+    const STATUS_TEXT_REFRESH = 'Need to refresh browser';
+    const STATUS_TEXT_DENIED  = 'Access denied';
+    const STATUS_TEXT_UNKNOWN = 'Apples generate error';
+
     /**
      * @return array|string
      */
