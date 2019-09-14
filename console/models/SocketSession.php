@@ -3,6 +3,7 @@
 
 namespace console\models;
 
+use common\models\Apple;
 use console\helpers\WSCommonHelper;
 use Yii;
 use Ratchet\ConnectionInterface;
@@ -126,6 +127,16 @@ class SocketSession extends Model
     {
         $data = WSCommonHelper::buildMessage(WSCommonHelper::STATUS_OK, $msg, WSCommonHelper::ACTION_REFRESH);
 
+        $this->client->send($data);
+    }
+
+    /**
+     * @param Apple  $model
+     * @param string $msg
+     */
+    public function sendRedraw(Apple $model, string $msg = '')
+    {
+        $data = WSCommonHelper::buildRedrawMessage($model, $msg);
         $this->client->send($data);
     }
 

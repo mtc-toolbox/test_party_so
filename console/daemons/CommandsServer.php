@@ -4,6 +4,7 @@
 namespace console\daemons;
 
 use common\helpers\AppleCommonHelper;
+use common\models\Apple;
 use console\models\SocketSession;
 use consik\yii2websocket\WebSocketServer;
 use Ratchet\ConnectionInterface;
@@ -18,6 +19,7 @@ use console\helpers\WSCommonHelper;
  */
 class CommandsServer extends WebSocketServer
 {
+    const COMMANDS_FALL = 'fall';
     protected $sessions;
     /**
      * CommandsServer constructor.
@@ -78,31 +80,14 @@ class CommandsServer extends WebSocketServer
     protected function commandGenerate(ConnectionInterface $client, $msg)
     {
         Console::stdout("Connection run command generate" . PHP_EOL);
-        $session = $this->findSession($client);
+
+        $session = $this->prepareSession($client, $msg);
 
         if (!isset($session)) {
-            Console::stdout("Session not found. Create new." . PHP_EOL);
-            $session->sendState(WSCommonHelper::STATUS_DENIED, WSCommonHelper::STATUS_TEXT_DENIED);
-            $session->close();
-            $this->deleteSession($session);
-
+            Console::stdout("Generate command failed" . PHP_EOL);
             return;
         }
 
-        Console::stdout("Getting token" . PHP_EOL);
-
-        $session->setData($msg);
-
-        Console::stdout("Check user" . PHP_EOL);
-
-        if ($session->isGuest()) {
-            Console::stdout("Session is for guest" . PHP_EOL);
-            $session->sendState(WSCommonHelper::STATUS_DENIED, WSCommonHelper::STATUS_TEXT_DENIED);
-            $session->close();
-            $this->deleteSession($session);
-
-            return;
-        }
         Console::stdout("Create apples" . PHP_EOL);
 
         if (!AppleCommonHelper::generateApples()) {
@@ -122,10 +107,73 @@ class CommandsServer extends WebSocketServer
             $session->sendRefresh(WSCommonHelper::STATUS_TEXT_REFRESH);
             Console::stdout("Ok." . PHP_EOL);
         }
-        $client->send('good');
 
         Console::stdout("Connection done command generate" . PHP_EOL);
 
+    }
+
+    protected function commandFall(ConnectionInterface $client, $msg)
+    {
+        Console::stdout("Connection run command fall" . PHP_EOL);
+
+        $session = $this->prepareSession($client, $msg);
+
+        if (!isset($session)) {
+            Console::stdout("Fall command failed" . PHP_EOL);
+            return;
+        }
+
+        $data = $session->getData();
+
+        if (!isset($data['data']['id'])) {
+            Console::stdout("Fall command failed" . PHP_EOL);
+            return;
+        }
+
+        $model = Apple::find()->andWhere(['id' => $data['data']['id']])->one();
+
+        if (!isset($model)) {
+            Console::stdout("Fall command failed" . PHP_EOL);
+            return;
+        }
+
+        if (!$model->fall()->save()) {
+            $session->sendState(WSCommonHelper::STATUS_UNKNOWN, WSCommonHelper::STATUS_TEXT_UNKNOWN);
+            Console::stdout("Fall command failed" . PHP_EOL);
+            return;
+        };
+
+        $count = count($this->sessions);
+
+        Console::stdout("Sending $count redraws" . PHP_EOL);
+
+        /* @var SocketSession $session */
+        foreach ($this->sessions as $session) {
+            Console::stdout("Sending redraw to " . $session->getToken());
+            $session->sendRedraw($model, WSCommonHelper::STATUS_TEXT_REDRAW);
+            Console::stdout("Ok." . PHP_EOL);
+        }
+
+        Console::stdout("Connection done command fall" . PHP_EOL);
+
+    }
+
+    protected function commandRedraw(ConnectionInterface $client, $msg)
+    {
+        Console::stdout("Connection run command redraw" . PHP_EOL);
+
+        $session = $this->prepareSession($client, $msg);
+
+        if (!isset($session)) {
+            Console::stdout("Redraw command failed" . PHP_EOL);
+            $session->sendState(WSCommonHelper::STATUS_UNKNOWN, WSCommonHelper::STATUS_TEXT_UNKNOWN);
+            return;
+        }
+
+        $data = $session->getData();
+
+
+        Console::stdout("Connection done command redraw" . PHP_EOL);
     }
 
     /**
@@ -173,5 +221,42 @@ class CommandsServer extends WebSocketServer
         }
 
         return $result;
+    }
+
+    /**
+     * @param ConnectionInterface $client
+     * @param                     $msg
+     *
+     * @return SocketSession|object|null
+     */
+    protected function prepareSession(ConnectionInterface $client, $msg)
+    {
+        $session = $this->findSession($client);
+
+        if (!isset($session)) {
+            Console::stdout("Session not found. Create new." . PHP_EOL);
+            $session->sendState(WSCommonHelper::STATUS_DENIED, WSCommonHelper::STATUS_TEXT_DENIED);
+            $session->close();
+            $this->deleteSession($session);
+
+            return null;
+        }
+
+        Console::stdout("Getting token" . PHP_EOL);
+
+        $session->setData($msg);
+
+        Console::stdout("Check user" . PHP_EOL);
+
+        if ($session->isGuest()) {
+            Console::stdout("Session is for guest" . PHP_EOL);
+            $session->sendState(WSCommonHelper::STATUS_DENIED, WSCommonHelper::STATUS_TEXT_DENIED);
+            $session->close();
+            $this->deleteSession($session);
+
+            return null;
+        }
+
+        return $session;
     }
 }

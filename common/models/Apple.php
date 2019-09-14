@@ -27,10 +27,17 @@ class Apple extends ActiveRecord
     const STATE_NAME_DELETED = 'Удалено';
     const STATE_NAME_UNKNOWN = 'Неизвестно';
 
+    const STATE_CODE_BAD     = 3;
+    const STATE_CODE_EAT     = 1;
+    const STATE_CODE_TREE    = 0;
+    const STATE_CODE_DELETED = 2;
+    const STATE_CODE_UNKNOWN = -1;
+
     // наименование цветов яблок
     const COLOR_NAME_GREEN  = 'green';
     const COLOR_NAME_RED    = 'red';
     const COLOR_NAME_YELLOW = 'yellow';
+    const COLOR_NAME_BAD    = 'black';
 
     // коды цветов для БД
     const COLOR_MAP = [
@@ -84,7 +91,7 @@ class Apple extends ActiveRecord
     {
         return [
             [['Color'], 'integer'],
-            [['IntegrityPercent'], 'number'],
+            [['IntegrityPercent'], 'number', 'numberPattern' => '/^\s*[+-]?\d+[.,]\d{2}\s*$/'],
             [['CreatedAt', 'FalledAt', 'DeletedAt'], 'safe'],
         ];
     }
@@ -153,7 +160,7 @@ class Apple extends ActiveRecord
      */
     public function isBad()
     {
-        return (isset($this->FalledAt) && (($this->FalledAt + self::TIME_TO_BAD_STATE) >= time()));
+        return (isset($this->FalledAt) && (($this->FalledAt + self::TIME_TO_BAD_STATE) <= time()));
     }
 
     /**
@@ -176,6 +183,10 @@ class Apple extends ActiveRecord
      */
     public function getColorName()
     {
+        if ($this->isBad()) {
+            return static::COLOR_NAME_BAD;
+        }
+
         return self::REVERSE_COLOR_MAP[$this->Color];
     }
 
@@ -204,6 +215,23 @@ class Apple extends ActiveRecord
     }
 
     /**
+     * @return float|int
+     */
+    public function getTimeToBad()
+    {
+        $result = 0;
+
+        if ($this->canEat()) {
+            $result = $this->FalledAt + static::TIME_TO_BAD_STATE - time();
+            if ($result = 0) {
+                $result = 0;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * @return string
      */
     public function getStateName()
@@ -225,6 +253,30 @@ class Apple extends ActiveRecord
         }
 
         return static::STATE_NAME_UNKNOWN;
+    }
+
+    /**
+     * @return int
+     */
+    public function getState()
+    {
+        if ($this->isBad()) {
+            return static::STATE_CODE_BAD;
+        }
+
+        if ($this->canFall()) {
+            return static::STATE_CODE_TREE;
+        }
+
+        if ($this->canEat()) {
+            return static::STATE_CODE_EAT;
+        }
+
+        if ($this->isDeleted()) {
+            return static::STATE_CODE_DELETED;
+        }
+
+        return static::STATE_CODE_UNKNOWN;
     }
 
     /**

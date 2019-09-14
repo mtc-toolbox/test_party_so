@@ -16,7 +16,7 @@ echo Html::beginTag('h2');
     echo Html::encode($this->title);
 echo Html::endTag('h2');
 
-echo Html::beginTag('div', ['class' => 'apple-list']);
+echo Html::beginTag('div', ['class' => 'apple-list form-group row']);
 
     echo ListView::widget([
         'layout'       => "{items}",
