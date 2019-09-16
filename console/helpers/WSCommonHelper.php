@@ -2,6 +2,7 @@
 
 namespace console\helpers;
 
+use common\models\Apple;
 use yii\helpers\Json;
 
 /**
@@ -13,6 +14,7 @@ class WSCommonHelper
     const REFRESH_TEXT = 'Need to refresh page';
 
     const ACTION_REFRESH = 'refresh';
+    const ACTION_REDRAW  = 'redraw';
     const ACTION_STATE   = 'state';
     const ACTION_NONE    = '';
 
@@ -22,8 +24,9 @@ class WSCommonHelper
 
     const STATUS_TEXT_OK      = 'Ok';
     const STATUS_TEXT_REFRESH = 'Need to refresh browser';
+    const STATUS_TEXT_REDRAW  = 'Need to redraw item';
     const STATUS_TEXT_DENIED  = 'Access denied';
-    const STATUS_TEXT_UNKNOWN = 'Apples generate error';
+    const STATUS_TEXT_UNKNOWN = 'Unknown action error';
 
     /**
      * @return array|string
@@ -38,7 +41,25 @@ class WSCommonHelper
      */
     public static function buildStateMessage(int $state = WSCommonHelper::STATUS_OK, string $msg = '')
     {
-        return static::buildMessage(static::STATUS_OK, $msg, static::ACTION_STATE);
+        return static::buildMessage($state, $msg, static::ACTION_STATE);
+    }
+
+    public static function buildRedrawMessage(Apple $model, string $message = '')
+    {
+        $data = [
+            'id' => $model->Id,
+            'eated' => $model->IntegrityPercent.'%',
+            'message' => $model->getStateName(),
+            'ttb' => $model->getTimeToBad(),
+            'state' => $model->getState(),
+        ];
+
+        return static::buildMessage(
+            static::STATUS_OK,
+            static::STATUS_TEXT_REDRAW,
+            static::ACTION_REDRAW,
+            $data
+            );
     }
 
     /**
@@ -60,7 +81,6 @@ class WSCommonHelper
             'data'   => $data ?? [],
         ];
 
-
-        return $data;
+        return Json::encode($result);
     }
 }

@@ -3,6 +3,7 @@
 
 namespace console\models;
 
+use common\models\Apple;
 use console\helpers\WSCommonHelper;
 use Yii;
 use Ratchet\ConnectionInterface;
@@ -16,17 +17,17 @@ class SocketSession extends Model
     /**
      * @var string
      */
-    public $action;
+    protected $action = '';
 
     /**
      * @var string
      */
-    public $token;
+    protected $token = '';
 
     /**
      * @var array
      */
-    public $data;
+    protected $data = [];
     /**
      * @var ConnectionInterface $connection
      */
@@ -66,6 +67,37 @@ class SocketSession extends Model
     }
 
     /**
+     * @param $data
+     *
+     * @return $this
+     */
+    public function setData($msg)
+    {
+        $this->data = json_decode($msg, true);
+
+        $this->token = $this->data['token'] ?? '';
+
+        $this->action = $this->data['action'] ?? '';
+
+        return $this;
+    }
+
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    public function getAction()
+    {
+        return $this->action;
+    }
+
+    public function getToken()
+    {
+        return $this->token;
+    }
+
+    /**
      * @return bool
      */
     public function isGuest()
@@ -90,14 +122,22 @@ class SocketSession extends Model
 
     /**
      * @param string $msg
-     *
-     * @return ConnectionInterface
      */
     public function sendRefresh(string $msg = '')
     {
         $data = WSCommonHelper::buildMessage(WSCommonHelper::STATUS_OK, $msg, WSCommonHelper::ACTION_REFRESH);
 
-        return $this->client->send($data);
+        $this->client->send($data);
+    }
+
+    /**
+     * @param Apple  $model
+     * @param string $msg
+     */
+    public function sendRedraw(Apple $model, string $msg = '')
+    {
+        $data = WSCommonHelper::buildRedrawMessage($model, $msg);
+        $this->client->send($data);
     }
 
     public function close()
@@ -118,7 +158,10 @@ class SocketSession extends Model
             return null;
         }
 
-        $cache->set($userId, static::SESSION_TTL);
+        if ($cache->exists($this->token)) {
+            $cache->delete($this->token);
+        }
+        $cache->add($this->token, $userId);
 
         return User::findIdentity($userId);
     }

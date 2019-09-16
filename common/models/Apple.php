@@ -17,14 +17,27 @@ use yii\behaviors\TimestampBehavior;
  * @property int   $FalledAt         Время падения
  * @property int   $DeletedAt        Время полного поедания
  */
-class Apple extends \yii\db\ActiveRecord
+class Apple extends ActiveRecord
 {
     const TIME_TO_BAD_STATE = 3600 * 5;
+
+    const STATE_NAME_BAD     = 'Испортилось';
+    const STATE_NAME_EAT     = 'Можно есть';
+    const STATE_NAME_TREE    = 'На дереве';
+    const STATE_NAME_DELETED = 'Удалено';
+    const STATE_NAME_UNKNOWN = 'Неизвестно';
+
+    const STATE_CODE_BAD     = 3;
+    const STATE_CODE_EAT     = 1;
+    const STATE_CODE_TREE    = 0;
+    const STATE_CODE_DELETED = 2;
+    const STATE_CODE_UNKNOWN = -1;
 
     // наименование цветов яблок
     const COLOR_NAME_GREEN  = 'green';
     const COLOR_NAME_RED    = 'red';
     const COLOR_NAME_YELLOW = 'yellow';
+    const COLOR_NAME_BAD    = 'black';
 
     // коды цветов для БД
     const COLOR_MAP = [
@@ -65,8 +78,10 @@ class Apple extends \yii\db\ActiveRecord
                 throw new Exception(Yii::t('app', 'Apple color is bad'), 500);
             }
         } else {
-            $this->Color = self::REVERSE_COLOR_MAP[random(0, count(self::COLOR_MAP))];
+            $this->Color = rand(0, count(self::COLOR_MAP) - 1);
         }
+
+        $this->IntegrityPercent = 100.00;
     }
 
     /**
@@ -76,7 +91,7 @@ class Apple extends \yii\db\ActiveRecord
     {
         return [
             [['Color'], 'integer'],
-            [['IntegrityPercent'], 'number'],
+            [['IntegrityPercent'], 'number', 'min' => 0.00, 'max' => 100.00],
             [['CreatedAt', 'FalledAt', 'DeletedAt'], 'safe'],
         ];
     }
@@ -133,6 +148,10 @@ class Apple extends \yii\db\ActiveRecord
 
         $this->IntegrityPercent = round($this->IntegrityPercent - $this->IntegrityPercent * $percent / 100, 2);
 
+        if (!$this->IntegrityPercent) {
+            $this->DeletedAt = time();
+        }
+
         return $this;
     }
 
@@ -141,7 +160,7 @@ class Apple extends \yii\db\ActiveRecord
      */
     public function isBad()
     {
-        return (isset($this->FalledAt) && (($this->FalledAt + self::TIME_TO_BAD_STATE) >= time()));
+        return (isset($this->FalledAt) && (($this->FalledAt + self::TIME_TO_BAD_STATE) <= time()));
     }
 
     /**
@@ -164,6 +183,109 @@ class Apple extends \yii\db\ActiveRecord
      */
     public function getColorName()
     {
+        if ($this->isBad()) {
+            return static::COLOR_NAME_BAD;
+        }
+
         return self::REVERSE_COLOR_MAP[$this->Color];
     }
+
+    /**
+     * @return bool
+     */
+    public function canEat()
+    {
+        return !$this->canFall() && !$this->isBad() && !$this->isDeleted();
+    }
+
+    /**
+     * @return bool
+     */
+    public function canFall()
+    {
+        return !isset($this->FalledAt);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDeleted()
+    {
+        return isset($this->DeletedAt);
+    }
+
+    /**
+     * @return float|int
+     */
+    public function getTimeToBad()
+    {
+        $result = 0;
+
+        if ($this->canEat()) {
+            $result = $this->FalledAt + static::TIME_TO_BAD_STATE - time();
+            if ($result < 0) {
+                $result = 0;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStateName()
+    {
+        if ($this->isBad()) {
+            return static::STATE_NAME_BAD;
+        }
+
+        if ($this->canFall()) {
+            return static::STATE_NAME_TREE;
+        }
+
+        if ($this->canEat()) {
+            return static::STATE_NAME_EAT;
+        }
+
+        if ($this->isDeleted()) {
+            return static::STATE_NAME_DELETED;
+        }
+
+        return static::STATE_NAME_UNKNOWN;
+    }
+
+    /**
+     * @return int
+     */
+    public function getState()
+    {
+        if ($this->isBad()) {
+            return static::STATE_CODE_BAD;
+        }
+
+        if ($this->canFall()) {
+            return static::STATE_CODE_TREE;
+        }
+
+        if ($this->canEat()) {
+            return static::STATE_CODE_EAT;
+        }
+
+        if ($this->isDeleted()) {
+            return static::STATE_CODE_DELETED;
+        }
+
+        return static::STATE_CODE_UNKNOWN;
+    }
+
+    /**
+     * {@inheritdoc}
+     * @return AppleQuery the active query used by this AR class.
+     */
+    public static function find()
+    {
+        return (new AppleQuery(get_called_class()))->active();
+    }
+
 }
