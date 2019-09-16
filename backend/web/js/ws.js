@@ -158,7 +158,7 @@ function drawBadApple(id, message = APPLE_TEXT_BAD) {
  */
 function deleteApple(id) {
 
-  $('.apple-container[data-key=' + id + ']').remove();
+  $('.apple-container[data-key=' + id + ']').parent().remove();
 }
 
 function redrawApple(data) {
