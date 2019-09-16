@@ -13,7 +13,13 @@ const APPLE_TIME_TO_BAD = 5 * 3600 * 1000;
 const APPLE_TEXT_CAN_EAT = 'Можно есть';
 const APPLE_TEXT_BAD = 'Испортилось';
 
+const WS_COMMAND_REDRAW = 'redraw';
+const WS_COMMAND_REFRESH = 'refresh';
+const WS_COMMAND_EAT = 'eat';
+
 var wsClient = new WebSocket(wsHost);
+
+initConnection();
 
 var socketEvents = [];
 
@@ -63,21 +69,37 @@ function buildWSMessage(action, data = {}) {
 }
 
 function wsRedrawApple(id) {
-  wsClient.send(buildWSMessage('redraw', {'id': id}));
+  wsClient.send(buildWSMessage(WS_COMMAND_REDRAW, {'id': id}));
+}
+
+function wsEatApple(id,  percent) {
+  wsClient.send(buildWSMessage(WS_COMMAND_EAT, {'id': id, 'percent' : percent}));
+}
+
+
+function showModal(id) {
+  $('#currency-modal').modal('show');
+  $('#eat-id').val(id);
 }
 
 /**
  *
  * @param id
+ * @param percent
+ * @param message
+ * @param ttb
  */
 function drawFalledApple(id, percent = '100.00%', message = APPLE_TEXT_CAN_EAT, ttb = APPLE_TIME_TO_BAD) {
   $('.apple-download.enabled-tool-button[data-key=' + id + ']').off('click');
+  $('.apple-container[data-key=' + id + ']').attr('state', APPLE_STATE_FALLED);
 
   $('.apple-container[data-key=' + id + ']').attr('time-to-bad', ttb);
 
-  if (socketEvents[ttb] === undefined) {
-    socketEvents[ttb] = setInterval(wsRedrawApple, ttb, id);
+  if (socketEvents[ttb] !== undefined) {
+    socketEvents.splice(ttb,1);
   }
+
+  socketEvents[ttb] = setInterval(wsRedrawApple, ttb*1000, id);
 
   $('.apple-download[data-key=' + id + ']').removeClass('enabled-tool-button');
   $('.apple-download[data-key=' + id + ']').addClass('disabled-tool-button');
@@ -97,18 +119,22 @@ function drawFalledApple(id, percent = '100.00%', message = APPLE_TEXT_CAN_EAT, 
 
   $('.apple-eat.enabled-tool-button[data-key=' + id + ']').on('click', function (e) {
     e.preventDefault();
-    alert('Eat 1:' + $(this).attr('data-key'));
+    showModal($(this).attr('data-key'));
   });
 }
 
 /**
  *
  * @param id
+ * @param message
  */
 function drawBadApple(id, message = APPLE_TEXT_BAD) {
 
+  socketEvents.splice(id,1);
+
   $('.apple-download.enabled-tool-button[data-key=' + id + ']').off('click');
   $('.apple-eat.enabled-tool-button[data-key=' + id + ']').off('click');
+  $('.apple-container[data-key=' + id + ']').attr('state', APPLE_STATE_BAD);
 
   $('.apple-download[data-key=' + id + ']').removeClass('enabled-tool-button');
   $('.apple-download[data-key=' + id + ']').addClass('disabled-tool-button');
@@ -150,23 +176,34 @@ function redrawApple(data) {
       drawBadApple(id, message);
       break;
     case APPLE_STATE_DELETED:
-      deleteApple($id);
+      deleteApple(id);
   }
 }
 
-wsClient.onmessage = function (e) {
-  let response = JSON.parse(e.data);
-  if (checkMessageFormat(response) && response.state.code == STATE_CODE_OK) {
-    switch (response.action) {
-      case 'refresh':
-        location.reload();
-        break;
-      case 'redraw':
-        redrawApple(response.data);
-        break;
+/**
+ *
+ */
+function initConnection () {
+  wsClient.onmessage = function (e) {
+    let response = JSON.parse(e.data);
+    if (checkMessageFormat(response) && response.state.code == STATE_CODE_OK) {
+      switch (response.action) {
+        case WS_COMMAND_REFRESH:
+          location.reload();
+          break;
+        case WS_COMMAND_REDRAW:
+          redrawApple(response.data);
+          break;
+      }
     }
+  };
+
+  wsClient.onclose = function () {
+    wsClient = new WebSocket(wsHost);
+    initConnection();
   }
-};
+}
+
 
 $('#generate-apples').on('click', function (e) {
   e.preventDefault();
@@ -175,7 +212,6 @@ $('#generate-apples').on('click', function (e) {
 
 $('.apple-download.enabled-tool-button').on('click', function (e) {
   e.preventDefault();
-  alert('Fall:' + $(this).attr('data-key'));
   wsClient.send(
     buildWSMessage('fall',
       {'id': $(this).attr('data-key')}
@@ -185,8 +221,18 @@ $('.apple-download.enabled-tool-button').on('click', function (e) {
 
 $('.apple-eat.enabled-tool-button').on('click', function (e) {
   e.preventDefault();
-  alert('Eat 2:' + $(this).attr('data-key'));
+  showModal($(this).attr('data-key'));
 });
 
-drawFalledApple(12);
-drawBadApple(14);
+$('#eat-button').on('click', function (e) {
+  e.preventDefault();
+  let id = $('#eat-id').val();
+  let percent = $('#eat-percent').val();
+  $('#eat-form').data('yiiActiveForm').submitting = false;
+  $('#eat-form').yiiActiveForm('validate');
+  if (!$('#eat-form').find('.has-error').length) {
+    $('#currency-modal').modal('hide');
+    wsEatApple(id, percent);
+  }
+
+});

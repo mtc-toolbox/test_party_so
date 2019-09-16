@@ -46,6 +46,20 @@ class CommandsServer extends WebSocketServer
     }
 
     /**
+     * @param ConnectionInterface $conn
+     */
+    public function onClose(ConnectionInterface $conn)
+    {
+        Console::stdout('Connection Closed' . PHP_EOL);
+
+        $session = $this->prepareSession($conn, []);
+
+        if (isset($session)) {
+            $this->deleteSession($session);
+        }
+    }
+
+    /**
      * @param ConnectionInterface $from
      * @param                     $msg
      *
@@ -151,10 +165,56 @@ class CommandsServer extends WebSocketServer
         foreach ($this->sessions as $session) {
             Console::stdout("Sending redraw to " . $session->getToken());
             $session->sendRedraw($model, WSCommonHelper::STATUS_TEXT_REDRAW);
-            Console::stdout("Ok." . PHP_EOL);
+            Console::stdout(" Ok." . PHP_EOL);
         }
 
         Console::stdout("Connection done command fall" . PHP_EOL);
+
+    }
+
+    protected function commandEat(ConnectionInterface $client, $msg)
+    {
+        Console::stdout("Connection run command eat" . PHP_EOL);
+
+        $session = $this->prepareSession($client, $msg);
+
+        if (!isset($session)) {
+            Console::stdout("Eat command failed" . PHP_EOL);
+            return;
+        }
+
+        $data = $session->getData();
+
+        if (!isset($data['data']['id']) || !$data['data']['percent']) {
+            Console::stdout("Eat command failed" . PHP_EOL);
+            return;
+        }
+
+        $model = Apple::find()->andWhere(['id' => $data['data']['id']])->one();
+
+        if (!isset($model)) {
+            Console::stdout("Eat command failed" . PHP_EOL);
+            return;
+        }
+
+        if (!$model->canEat() || !$model->eat($data['data']['percent'])->save()) {
+            $session->sendState(WSCommonHelper::STATUS_UNKNOWN, WSCommonHelper::STATUS_TEXT_UNKNOWN);
+            Console::stdout("Eat command failed" . PHP_EOL);
+            return;
+        };
+
+        $count = count($this->sessions);
+
+        Console::stdout("Sending $count redraws" . PHP_EOL);
+
+        /* @var SocketSession $session */
+        foreach ($this->sessions as $session) {
+            Console::stdout("Sending redraw to " . $session->getToken());
+            $session->sendRedraw($model, WSCommonHelper::STATUS_TEXT_REDRAW);
+            Console::stdout(" Ok." . PHP_EOL);
+        }
+
+        Console::stdout("Connection done command eat" . PHP_EOL);
 
     }
 
@@ -199,6 +259,12 @@ class CommandsServer extends WebSocketServer
      */
     protected function deleteSession(SocketSession $session)
     {
+        $token = $session->getToken();
+
+        if (isset($token)) {
+            $cache = Yii::$app->cache;
+            $cache->delete($token);
+        }
         /* @var SocketSession $session */
         $this->sessions->detach($session);
     }
@@ -235,7 +301,7 @@ class CommandsServer extends WebSocketServer
 
         if (!isset($session)) {
             Console::stdout("Session not found. Create new." . PHP_EOL);
-            $session->sendState(WSCommonHelper::STATUS_DENIED, WSCommonHelper::STATUS_TEXT_DENIED);
+            $session->sendRefresh(WSCommonHelper::STATUS_TEXT_DENIED);
             $session->close();
             $this->deleteSession($session);
 
@@ -250,7 +316,7 @@ class CommandsServer extends WebSocketServer
 
         if ($session->isGuest()) {
             Console::stdout("Session is for guest" . PHP_EOL);
-            $session->sendState(WSCommonHelper::STATUS_DENIED, WSCommonHelper::STATUS_TEXT_DENIED);
+            $session->sendRefresh(WSCommonHelper::STATUS_TEXT_DENIED);
             $session->close();
             $this->deleteSession($session);
 

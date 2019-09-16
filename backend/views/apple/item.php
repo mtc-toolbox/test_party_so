@@ -12,10 +12,12 @@ $downloadState = $model->canFall() ? 'enabled-tool-button' : 'disabled-tool-butt
 
 $eatState =  $model->canEat() ? 'enabled-tool-button' : 'disabled-tool-button';
 
+$appleState= $model->getState();
+
 ?>
 
-<div class = "apple-cell col-lg-2 col-md-3 col-sm-6">
-  <div class="apple-container shadow" data-key="<?= $model->Id?>" time-to-bad="<?=$timeToBad?>">
+<div class = "apple-cell col-2">
+  <div class="apple-container shadow" data-key="<?= $model->Id?>" time-to-bad="<?=$timeToBad?>" state="<?=$appleState?>">
 	  <div class="apple-download <?=$downloadState?>" data-key="<?= $model->Id?>" >
   		<div class="fa fa-download <?=$downloadState?>"></div>
 	  </div>

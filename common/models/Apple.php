@@ -81,7 +81,7 @@ class Apple extends ActiveRecord
             $this->Color = rand(0, count(self::COLOR_MAP) - 1);
         }
 
-        $this->IntegrityPercent = 100;
+        $this->IntegrityPercent = 100.00;
     }
 
     /**
@@ -91,7 +91,7 @@ class Apple extends ActiveRecord
     {
         return [
             [['Color'], 'integer'],
-            [['IntegrityPercent'], 'number', 'numberPattern' => '/^\s*[+-]?\d+[.,]\d{2}\s*$/'],
+            [['IntegrityPercent'], 'number', 'min' => 0.00, 'max' => 100.00],
             [['CreatedAt', 'FalledAt', 'DeletedAt'], 'safe'],
         ];
     }
@@ -149,7 +149,7 @@ class Apple extends ActiveRecord
         $this->IntegrityPercent = round($this->IntegrityPercent - $this->IntegrityPercent * $percent / 100, 2);
 
         if (!$this->IntegrityPercent) {
-            $this->DeletedAt = false;
+            $this->DeletedAt = time();
         }
 
         return $this;
@@ -223,7 +223,7 @@ class Apple extends ActiveRecord
 
         if ($this->canEat()) {
             $result = $this->FalledAt + static::TIME_TO_BAD_STATE - time();
-            if ($result = 0) {
+            if ($result < 0) {
                 $result = 0;
             }
         }
