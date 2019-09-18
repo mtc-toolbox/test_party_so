@@ -8,7 +8,7 @@ const APPLE_STATE_FALLED = 1;
 const APPLE_STATE_BAD = 3;
 const APPLE_STATE_DELETED = 2;
 
-const APPLE_TIME_TO_BAD = 5 * 3600 * 1000;
+const APPLE_TIME_TO_BAD = 3600 * 5;
 
 const APPLE_TEXT_CAN_EAT = 'Можно есть';
 const APPLE_TEXT_BAD = 'Испортилось';
@@ -72,8 +72,8 @@ function wsRedrawApple(id) {
   wsClient.send(buildWSMessage(WS_COMMAND_REDRAW, {'id': id}));
 }
 
-function wsEatApple(id,  percent) {
-  wsClient.send(buildWSMessage(WS_COMMAND_EAT, {'id': id, 'percent' : percent}));
+function wsEatApple(id, percent) {
+  wsClient.send(buildWSMessage(WS_COMMAND_EAT, {'id': id, 'percent': percent}));
 }
 
 
@@ -95,11 +95,11 @@ function drawFalledApple(id, percent = '100.00%', message = APPLE_TEXT_CAN_EAT, 
 
   $('.apple-container[data-key=' + id + ']').attr('time-to-bad', ttb);
 
-  if (socketEvents[ttb] !== undefined) {
-    socketEvents.splice(ttb,1);
+  if (socketEvents[id] !== undefined) {
+    socketEvents.splice(id, 1);
   }
 
-  socketEvents[ttb] = setInterval(wsRedrawApple, ttb*1000, id);
+  socketEvents[id] = setTimeout(wsRedrawApple, ttb * 1000, id);
 
   $('.apple-download[data-key=' + id + ']').removeClass('enabled-tool-button');
   $('.apple-download[data-key=' + id + ']').addClass('disabled-tool-button');
@@ -130,7 +130,9 @@ function drawFalledApple(id, percent = '100.00%', message = APPLE_TEXT_CAN_EAT, 
  */
 function drawBadApple(id, message = APPLE_TEXT_BAD) {
 
-  socketEvents.splice(id,1);
+  if (typeof(socketEvents[id]) !== undefined) {
+    socketEvents.splice(id, 1);
+  }
 
   $('.apple-download.enabled-tool-button[data-key=' + id + ']').off('click');
   $('.apple-eat.enabled-tool-button[data-key=' + id + ']').off('click');
@@ -183,7 +185,7 @@ function redrawApple(data) {
 /**
  *
  */
-function initConnection () {
+function initConnection() {
   wsClient.onmessage = function (e) {
     let response = JSON.parse(e.data);
     if (checkMessageFormat(response) && response.state.code == STATE_CODE_OK) {
