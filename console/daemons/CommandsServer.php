@@ -111,16 +111,7 @@ class CommandsServer extends WebSocketServer
             return;
         }
 
-        $count = count($this->sessions);
-
-        Console::stdout("Sending $count refreshes" . PHP_EOL);
-
-        /* @var SocketSession $session */
-        foreach ($this->sessions as $session) {
-            Console::stdout("Sending refresh to " . $session->getToken());
-            $session->sendRefresh(WSCommonHelper::STATUS_TEXT_REFRESH);
-            Console::stdout("Ok." . PHP_EOL);
-        }
+        $this->sendRefresh();
 
         Console::stdout("Connection done command generate" . PHP_EOL);
 
@@ -157,16 +148,7 @@ class CommandsServer extends WebSocketServer
             return;
         };
 
-        $count = count($this->sessions);
-
-        Console::stdout("Sending $count redraws" . PHP_EOL);
-
-        /* @var SocketSession $session */
-        foreach ($this->sessions as $session) {
-            Console::stdout("Sending redraw to " . $session->getToken());
-            $session->sendRedraw($model, WSCommonHelper::STATUS_TEXT_REDRAW);
-            Console::stdout(" Ok." . PHP_EOL);
-        }
+        $this->sendRedraw($model);
 
         Console::stdout("Connection done command fall" . PHP_EOL);
 
@@ -203,16 +185,7 @@ class CommandsServer extends WebSocketServer
             return;
         };
 
-        $count = count($this->sessions);
-
-        Console::stdout("Sending $count redraws" . PHP_EOL);
-
-        /* @var SocketSession $session */
-        foreach ($this->sessions as $session) {
-            Console::stdout("Sending redraw to " . $session->getToken());
-            $session->sendRedraw($model, WSCommonHelper::STATUS_TEXT_REDRAW);
-            Console::stdout(" Ok." . PHP_EOL);
-        }
+        $this->sendRedraw($model);
 
         Console::stdout("Connection done command eat" . PHP_EOL);
 
@@ -231,6 +204,20 @@ class CommandsServer extends WebSocketServer
         }
 
         $data = $session->getData();
+
+        if (!isset($data['data']['id'])) {
+            Console::stdout("Redraw command failed" . PHP_EOL);
+            return;
+        }
+
+        $model = Apple::find()->andWhere(['id' => $data['data']['id']])->one();
+
+        if (!isset($model)) {
+            Console::stdout("Redraw command failed" . PHP_EOL);
+            return;
+        }
+
+        $this->sendRedraw($model);
 
 
         Console::stdout("Connection done command redraw" . PHP_EOL);
@@ -324,5 +311,39 @@ class CommandsServer extends WebSocketServer
         }
 
         return $session;
+    }
+
+    /**
+     * @param Apple $model
+     */
+    protected function sendRedraw(Apple $model)
+    {
+        $count = count($this->sessions);
+
+        Console::stdout("Sending $count redraws" . PHP_EOL);
+
+        /* @var SocketSession $session */
+        foreach ($this->sessions as $session) {
+            Console::stdout("Sending redraw to " . $session->getToken());
+            $session->sendRedraw($model, WSCommonHelper::STATUS_TEXT_REDRAW);
+            Console::stdout(" Ok." . PHP_EOL);
+        }
+    }
+
+    /**
+     *
+     */
+    protected function sendRefresh()
+    {
+        $count = count($this->sessions);
+
+        Console::stdout("Sending $count refreshes" . PHP_EOL);
+
+        /* @var SocketSession $session */
+        foreach ($this->sessions as $session) {
+            Console::stdout("Sending refresh to " . $session->getToken());
+            $session->sendRefresh(WSCommonHelper::STATUS_TEXT_REFRESH);
+            Console::stdout("Ok." . PHP_EOL);
+        }
     }
 }
