@@ -1,10 +1,9 @@
 version: '3.2'
-
 services:
   backend:
     build: backend
     ports:
-      - 21080:82
+      - 21080:80
     volumes:
       # Re-use local composer cache via host-volume
       - ~/.composer-docker/cache:/root/.composer/cache:delegated
@@ -21,6 +20,4 @@ services:
 
   memcached:
     image: sameersbn/memcached:1.5.6-2
-    ports:
-      - "11211:11311"
     restart: always
