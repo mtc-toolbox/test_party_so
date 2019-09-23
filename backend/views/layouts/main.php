@@ -41,12 +41,13 @@ $this->beginPage()
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
-    $menuItems = [
-        ['label' => 'Яблоки', 'url' => ['/site/index']],
-    ];
+
     if (Yii::$app->user->isGuest) {
-        $menuItems[] = ['label' => 'Вход', 'url' => ['/site/login']];
+        $menuItems = [['label' => 'Вход', 'url' => ['/site/login']]];
     } else {
+        $menuItems = [
+            ['label' => 'Яблоки', 'url' => ['/site/index']],
+        ];
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')
             . Html::submitButton(
@@ -64,9 +65,6 @@ $this->beginPage()
     ?>
 
     <div class="container">
-        <?= Breadcrumbs::widget([
-            'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-        ]) ?>
         <?= Alert::widget() ?>
         <?= $content ?>
     </div>

@@ -10,7 +10,7 @@ use consik\yii2websocket\WebSocketServer;
 use Ratchet\ConnectionInterface;
 use yii\helpers\Console;
 use yii\helpers\Json;
-
+use Yii;
 use console\helpers\WSCommonHelper;
 
 /**
@@ -99,6 +99,9 @@ class CommandsServer extends WebSocketServer
 
         if (!isset($session)) {
             Console::stdout("Generate command failed" . PHP_EOL);
+
+            $this->sendClientRefresh($client);
+
             return;
         }
 
@@ -125,6 +128,7 @@ class CommandsServer extends WebSocketServer
 
         if (!isset($session)) {
             Console::stdout("Fall command failed" . PHP_EOL);
+            $this->sendClientRefresh($client);
             return;
         }
 
@@ -162,6 +166,7 @@ class CommandsServer extends WebSocketServer
 
         if (!isset($session)) {
             Console::stdout("Eat command failed" . PHP_EOL);
+            $this->sendClientRefresh($client);
             return;
         }
 
@@ -199,7 +204,7 @@ class CommandsServer extends WebSocketServer
 
         if (!isset($session)) {
             Console::stdout("Redraw command failed" . PHP_EOL);
-            $session->sendState(WSCommonHelper::STATUS_UNKNOWN, WSCommonHelper::STATUS_TEXT_UNKNOWN);
+            $this->sendClientRefresh($client);
             return;
         }
 
@@ -288,9 +293,8 @@ class CommandsServer extends WebSocketServer
 
         if (!isset($session)) {
             Console::stdout("Session not found. Create new." . PHP_EOL);
-            $session->sendRefresh(WSCommonHelper::STATUS_TEXT_DENIED);
-            $session->close();
-            $this->deleteSession($session);
+
+            $this->sendClientRefresh($client);
 
             return null;
         }
@@ -345,5 +349,17 @@ class CommandsServer extends WebSocketServer
             $session->sendRefresh(WSCommonHelper::STATUS_TEXT_REFRESH);
             Console::stdout("Ok." . PHP_EOL);
         }
+    }
+
+    /**
+     * @param ConnectionInterface $client
+     */
+    protected function sendClientRefresh(ConnectionInterface $client)
+    {
+        $data = WSCommonHelper::buildMessage(WSCommonHelper::STATUS_OK, WSCommonHelper::STATUS_TEXT_REFRESH, WSCommonHelper::ACTION_REFRESH);
+
+        $this->client->send($data);
+
+        $client->close();
     }
 }
