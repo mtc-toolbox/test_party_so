@@ -49,3 +49,6 @@ phpunit.phar
 
 # composer.lock
 composer.lock
+
+#cache data
+/backend/cache
