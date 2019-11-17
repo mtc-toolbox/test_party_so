@@ -1,6 +1,5 @@
 <?php
 
-
 namespace console\daemons;
 
 use common\helpers\AppleCommonHelper;
@@ -20,6 +19,7 @@ use console\helpers\WSCommonHelper;
 class CommandsServer extends WebSocketServer
 {
     const COMMANDS_FALL = 'fall';
+
     protected $sessions;
     /**
      * CommandsServer constructor.
@@ -120,6 +120,12 @@ class CommandsServer extends WebSocketServer
 
     }
 
+    /**
+     * @param ConnectionInterface $client
+     * @param                     $msg
+     *
+     * @throws \yii\base\Exception
+     */
     protected function commandFall(ConnectionInterface $client, $msg)
     {
         Console::stdout("Connection run command fall" . PHP_EOL);
@@ -158,6 +164,12 @@ class CommandsServer extends WebSocketServer
 
     }
 
+    /**
+     * @param ConnectionInterface $client
+     * @param                     $msg
+     *
+     * @throws \yii\base\Exception
+     */
     protected function commandEat(ConnectionInterface $client, $msg)
     {
         Console::stdout("Connection run command eat" . PHP_EOL);
@@ -196,6 +208,10 @@ class CommandsServer extends WebSocketServer
 
     }
 
+    /**
+     * @param ConnectionInterface $client
+     * @param                     $msg
+     */
     protected function commandRedraw(ConnectionInterface $client, $msg)
     {
         Console::stdout("Connection run command redraw" . PHP_EOL);

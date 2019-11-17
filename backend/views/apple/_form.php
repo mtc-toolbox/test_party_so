@@ -7,9 +7,9 @@ use yii\bootstrap\Modal;
 /* @var $this yii\web\View */
 /* @var $model common\models\Apple */
 /* @var $form yii\widgets\ActiveForm */
+
 Modal::begin([
     'header' => 'Поедание',
-
     'id' => 'currency-modal',
 ],
     [
@@ -18,26 +18,22 @@ Modal::begin([
         ],
     ]);
 
-?>
+    echo Html::beginTag('div', ['class' => 'apple-form']);
 
-<div class="apple-form">
+    $form = ActiveForm::begin(['id' => 'eat-form']);
 
-    <?php $form = ActiveForm::begin(
-        ['id' => 'eat-form']
-    ); ?>
+        echo Html::hiddenInput('eat-id', '', ['id' => 'eat-id']);
 
-    <input type="hidden" name="eat-id" value="" id="eat-id"/>
+        echo $form->field($model, 'IntegrityPercent')->textInput(['maxlength' => true, 'id' => 'eat-percent']);
 
-    <?= $form->field($model, 'IntegrityPercent')->textInput(['maxlength' => true, 'id' => 'eat-percent']) ?>
+        echo Html::beginTag('div', ['class' => 'form-group']);
 
-    <div class="form-group">
-        <?= Html::tag("span", Yii::t('app', 'Съесть'), ['class' => 'btn btn-success', 'id' => 'eat-button']) ?>
-    </div>
+            echo Html::tag("span", Yii::t('app', 'Съесть'), ['class' => 'btn btn-success', 'id' => 'eat-button']);
 
-    <?php ActiveForm::end(); ?>
+        echo Html::endTag('div');
 
-</div>
+    ActiveForm::end();
 
-<?php
+    echo Html::endTag('div');
 
 Modal::end();

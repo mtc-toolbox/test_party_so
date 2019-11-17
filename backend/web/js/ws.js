@@ -130,7 +130,7 @@ function drawFalledApple(id, percent = '100.00%', message = APPLE_TEXT_CAN_EAT, 
  */
 function drawBadApple(id, message = APPLE_TEXT_BAD) {
 
-  if (typeof(socketEvents[id]) !== undefined) {
+  if (typeof (socketEvents[id]) !== undefined) {
     socketEvents.splice(id, 1);
   }
 

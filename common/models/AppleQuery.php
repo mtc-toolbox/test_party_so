@@ -16,7 +16,7 @@ class AppleQuery extends ActiveQuery
      */
     public function active()
     {
-        return $this->andFilterWhere(['is', self::getPrimaryTableName().'.DeletedAt', new Expression('null')]);
+        return $this->andFilterWhere(['is', self::getPrimaryTableName() . '.DeletedAt', new Expression('null')]);
     }
 
     /**
@@ -24,7 +24,7 @@ class AppleQuery extends ActiveQuery
      */
     public function deleted()
     {
-        return $this->andFilterWhere(['not', self::getPrimaryTableName().'.DeletedAt', new Expression('null')]);
+        return $this->andFilterWhere(['not', self::getPrimaryTableName() . '.DeletedAt', new Expression('null')]);
     }
 
     /**
@@ -32,7 +32,7 @@ class AppleQuery extends ActiveQuery
      */
     public function falled()
     {
-        return $this->andFilterWhere(['not', self::getPrimaryTableName().'.FalledAt', new Expression('null')]);
+        return $this->andFilterWhere(['not', self::getPrimaryTableName() . '.FalledAt', new Expression('null')]);
     }
 
     /**
@@ -40,7 +40,7 @@ class AppleQuery extends ActiveQuery
      */
     public function handing()
     {
-        return $this->andFilterWhere(['is', self::getPrimaryTableName().'.FalledAt', new Expression('null')]);
+        return $this->andFilterWhere(['is', self::getPrimaryTableName() . '.FalledAt', new Expression('null')]);
     }
 
     /**
