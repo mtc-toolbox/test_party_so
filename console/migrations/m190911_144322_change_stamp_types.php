@@ -18,7 +18,7 @@ class m190911_144322_change_stamp_types extends Migration
         $this->dropColumn('Apple', 'DeletedAt');
 
         $this->addColumn('Apple', 'CreatedAt', 'INTEGER');
-        $this->addCommentOnColumn('Apple', 'CreatedAt', 'Время поавления');
+        $this->addCommentOnColumn('Apple', 'CreatedAt', 'Время появления');
 
         $this->addColumn('Apple', 'FalledAt', 'INTEGER');
         $this->addCommentOnColumn('Apple', 'FalledAt', 'Время падения');
