@@ -10,31 +10,56 @@ $timeToBad = $model->getTimeToBad();
 
 $downloadState = $model->canFall() ? 'enabled-tool-button' : 'disabled-tool-button';
 
-$eatState =  $model->canEat() ? 'enabled-tool-button' : 'disabled-tool-button';
+$eatState = $model->canEat() ? 'enabled-tool-button' : 'disabled-tool-button';
 
-$appleState= $model->getState();
+$appleState = $model->getState();
 
-?>
+echo Html::beginTag('div', ['class' => 'apple-cell col-2']);
 
-<div class = "apple-cell col-2">
-  <div class="apple-container shadow" data-key="<?= $model->Id?>" time-to-bad="<?=$timeToBad?>" state="<?=$appleState?>">
-	  <div class="apple-download <?=$downloadState?>" data-key="<?= $model->Id?>" >
-  		<div class="fa fa-download <?=$downloadState?>"></div>
-	  </div>
-      <div class="apple-eat <?=$eatState?>" data-key="<?= $model->Id?>">
-  		<div class="fab fa-apple <?=$eatState?>" data-key="<?= $model->Id?>"></div>
-	  </div>
-	  <div class="apple-image <?=$model->getColorName() ?>">
-  		<div class="fa fa-apple-alt"></div>
-	  </div>
-      <?php
-        if (!$model->isBad())
-        {
-            echo Html::tag('div',$model->IntegrityPercent.'%',['class' => 'apple-eated']);
+    echo Html::beginTag('div', [
+        'class'       => 'apple-container shadow',
+        'data-key'    => $model->Id,
+        'time-to-bad' => $timeToBad,
+        'state'       => $appleState,
+    ]);
+
+        echo Html::beginTag('div', [
+            'class'    => 'apple-download '.$downloadState,
+            'data-key' => $model->Id,
+        ]);
+            echo Html::tag('div', '', ['class' => 'fa fa-download']);
+        echo Html::endTag('div');
+
+        echo Html::beginTag('div', [
+            'class'    => 'apple-eat ' . $eatState,
+            'data-key' => $model->Id,
+        ]);
+
+            echo Html::tag('div', '', [
+                'class'    => 'fab fa-apple',
+                'data-key' => $model->Id,
+            ]);
+
+        echo Html::endTag('div');
+
+        echo Html::beginTag('div', [
+            'class'    => 'apple-image ' . $model->getColorName(),
+            'data-key' => $model->Id,
+        ]);
+
+            echo Html::tag('div', '', [
+                'class' => 'fa fa-apple-alt',
+            ]);
+
+        echo Html::endTag('div');
+
+        if (!$model->isBad()) {
+            echo Html::tag('div', $model->IntegrityPercent . '%', ['class' => 'apple-eated']);
         }
-      ?>
-      <div class="apple-state" >
-            <?=$model->getStateName() ?>
-      </div>
-  </div>
-</div>
+
+        echo Html::tag('div', $model->getStateName(), [
+            'class' => 'apple-state',
+        ]);
+
+    echo Html::endTag('div');
+echo Html::endTag('div');

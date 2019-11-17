@@ -12,9 +12,7 @@ use yii\widgets\ListView;
 
 $this->title = Yii::t('app', 'Яблоки');
 
-echo Html::beginTag('h2');
-    echo Html::encode($this->title);
-echo Html::endTag('h2');
+echo Html::tag('h2', Html::encode($this->title));
 
 echo Html::beginTag('div', ['class' => 'apple-list form-group row']);
 
@@ -41,6 +39,7 @@ echo Html::endTag('div');
 echo $this->render('create', [
     'model'   => new Apple(),
 ]);
+
 $token = Yii::$app->getRequest()->getCsrfToken(false);
 $key = Yii::$app->cache->buildKey($token);
 
