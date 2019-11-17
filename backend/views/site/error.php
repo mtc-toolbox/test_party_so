@@ -8,20 +8,16 @@
 use yii\helpers\Html;
 
 $this->title = $name;
-?>
-<div class="site-error">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+echo Html::beginTag('div', ['class' => 'site-error']);
 
-    <div class="alert alert-danger">
-        <?= nl2br(Html::encode($message)) ?>
-    </div>
+    echo Html::tag('h1', Html::encode($this->title));
 
-    <p>
-        The above error occurred while the Web server was processing your request.
-    </p>
-    <p>
-        Please contact us if you think this is a server error. Thank you.
-    </p>
+    echo Html::beginTag('div', ['class' => 'alert alert-danger']);
+        echo nl2br(Html::encode($message));
+    echo Html::endTag('div');
 
-</div>
+    echo Html::tag('p', Yii::t('app', 'The above error occurred while the Web server was processing your request.'));
+    echo Html::tag('p', Yii::t('app', 'Please contact us if you think this is a server error. Thank you.'));
+
+echo Html::endTag('div');
